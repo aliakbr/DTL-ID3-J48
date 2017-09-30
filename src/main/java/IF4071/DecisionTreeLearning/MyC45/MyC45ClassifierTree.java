@@ -109,7 +109,7 @@ public class MyC45ClassifierTree{
     private void buildTree(Instances data) {
         // Set dataset
         setData(data);
-        
+
         int numAttr = data.numAttributes();
         double[] gainRatios = new double[numAttr];
         Enumeration enumeration = data.enumerateAttributes();
@@ -228,13 +228,44 @@ public class MyC45ClassifierTree{
         return (double) numTrue / (double) numFalse;
     }
 
-    private void prune(Instances data) {
+    private void prune(Instances data) throws Exception {
+        if (children != null) {
+            // Calculate current error
+            double currentError = calculateError(data);
 
-    }
+            // Calculate pruned error
+            double[] _classDistribution = new double[data.numClasses()];
+            Enumeration instanceEnum = data.enumerateInstances();
+            while (instanceEnum.hasMoreElements()) {
+                Instance instance = (Instance) instanceEnum.nextElement();
+                _classDistribution[(int) instance.classValue()]++;
+            }
+            Utils.normalize(_classDistribution);
+            int _decisonIndex = Utils.maxIndex(_classDistribution);
 
 
-    public double[] distributionForInstance(Instance instance) throws Exception {
-        return new double[0];
+            int numFalse = 0;
+            int numTrue = 0;
+            instanceEnum = data.enumerateInstances();
+            while(instanceEnum.hasMoreElements()){
+                Instance instance = (Instance) instanceEnum.nextElement();
+                if (_decisonIndex == instance.classIndex()){
+                    numTrue += 1;
+                }
+                else{
+                    numFalse += 1;
+                }
+            }
+            double pruned_error = (double) numTrue/ (double) numFalse;
+
+            // Prune process
+            if (pruned_error < currentError){
+                setChildren(null);
+                setSplitAttribute(null);
+                setClassIndex(_decisonIndex);
+                setClassDistribution(_classDistribution);
+            }
+        }
     }
 
     // Getter - Setter auto generated
