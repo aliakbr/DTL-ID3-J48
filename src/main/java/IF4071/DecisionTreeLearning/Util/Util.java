@@ -14,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
 import weka.filters.supervised.instance.Resample;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class Util {
     private Scanner input;
@@ -30,6 +31,20 @@ public class Util {
 
     public Instances Resample(Instances data) throws Exception {
         Resample filter = new Resample();
+        Instances newData;
+
+        filter.setInputFormat(data);
+        newData = Filter.useFilter(data, filter);
+
+        return newData;
+    }
+
+    public Instances Remove(Instances data, String attr) throws Exception {
+        String[] options = new String[2];
+        options[0] = "-R";  // "range"
+        options[1] = attr;
+        Remove filter = new Remove();
+        filter.setOptions(options);
         Instances newData;
 
         filter.setInputFormat(data);
