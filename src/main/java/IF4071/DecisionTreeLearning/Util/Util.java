@@ -1,17 +1,16 @@
 package IF4071.DecisionTreeLearning.Util;
 
 import weka.core.Instances;
-import java.io.BufferedReader;
-import java.io.FileReader;
+
+import java.io.*;
 import java.util.Scanner;
+
+import weka.core.converters.CSVLoader;
 import weka.filters.Filter;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import java.util.Random;
-import java.io.ObjectOutputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.FileInputStream;
+
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
 import weka.filters.supervised.instance.Resample;
 import weka.filters.unsupervised.attribute.Remove;
@@ -25,6 +24,14 @@ public class Util {
         Instances data = new Instances(reader);
         data.setClassIndex(data.numAttributes() - 1);
         reader.close();
+
+        return data;
+    }
+
+    public Instances ReadCSV(String filename) throws Exception {
+        CSVLoader loader = new CSVLoader();
+        loader.setSource(new File(filename));
+        Instances data = loader.getDataSet();
 
         return data;
     }
