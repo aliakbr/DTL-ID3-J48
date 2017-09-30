@@ -1,12 +1,13 @@
 package IF4071.DecisionTreeLearning.MyID3;
 
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.core.*;
 
-public class MyID3 implements Classifier {
+import java.util.List;
+import java.util.Vector;
+
+public class MyID3 extends AbstractClassifier {
 
     private MyID3ClassifierTree root;
 
@@ -16,23 +17,22 @@ public class MyID3 implements Classifier {
         Instances data = new Instances(instances);
         data.deleteWithMissingClass();
         root = new MyID3ClassifierTree();
-        root.buildTree(instances);
+        root.buildTree(instances, new Vector<Attribute>());
     }
 
     public double classifyInstance(Instance instance) throws Exception {
-        return 0;
+        return root.classifyInstance(instance);
     }
 
     public double[] distributionForInstance(Instance instance) throws Exception {
-        return new double[0];
+        return root.distributionForInstance(instance);
     }
 
     public Capabilities getCapabilities() {
-        Capabilities result = new Capabilities((CapabilitiesHandler) this);
+        Capabilities result = super.getCapabilities();
         result.disableAll();
 
         result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
-        result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
 
         result.enable(Capabilities.Capability.NOMINAL_CLASS);
 
