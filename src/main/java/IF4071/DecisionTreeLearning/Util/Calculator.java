@@ -15,11 +15,14 @@ public class Calculator {
         }
         else{
             int totalClass = data.numClasses();
+            //System.out.println("DEBUG total class: " + totalClass);
             double[] classCount = new double[totalClass];
             Enumeration instanceEnum = data.enumerateInstances();
             while (instanceEnum.hasMoreElements()){
                 Instance instance = (Instance) instanceEnum.nextElement();
-                classCount[instance.classIndex()]++;
+                //System.out.println("DEBUG class index: " + instance.classIndex());
+                //System.out.println("DEBUG class value: " + instance.classValue());
+                classCount[(int) instance.classValue()]++;
             }
             double entropy = 0.0;
 
@@ -34,7 +37,7 @@ public class Calculator {
 
     // Split data by attr
     public static Instances[] splitDataByAttr(Instances data, Attribute attr){
-        Instances[] splittedData = new Instances[2];
+        Instances[] splittedData = new Instances[attr.numValues()];
         for (int i = 0; i < attr.numValues(); i++){
             splittedData[i] = new Instances(data, data.numInstances()); //Initialize splitted instances
         }
