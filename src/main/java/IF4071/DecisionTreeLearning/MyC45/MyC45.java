@@ -15,11 +15,7 @@ public class MyC45 implements Classifier {
     }
 
     public double classifyInstance(Instance instance) throws Exception {
-        return 0;
-    }
-
-    public double[] distributionForInstance(Instance instance) throws Exception {
-        return new double[0];
+        return root.classifyInstance(instance);
     }
 
     public Capabilities getCapabilities() {
