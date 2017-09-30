@@ -1,4 +1,4 @@
-package IF4071.DecisionTreeLearning.MyC45;
+package IF4071.DecisionTreeLearning.Util;
 
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -7,7 +7,7 @@ import weka.core.Utils;
 
 import java.util.Enumeration;
 
-public class MyC45Utils {
+public class Calculator {
     // Entropy calculator
     public static double calculateEntropy(Instances data) {
         if (data.numInstances() == 0){
@@ -88,6 +88,8 @@ public class MyC45Utils {
     }
 
     // Numeric handler
+
+    //Split by attr val
     public static Instances[] splitAttributeNumVal(Instances data, Attribute attr, double treshold){
         Instances[] splittedData = new Instances[2];
         for (int i = 0; i < 2; i++){
@@ -112,6 +114,7 @@ public class MyC45Utils {
         return splittedData;
     }
 
+    // Numeric Information Gain
     public static double numericInformationGain(Instances data, Attribute attr, double treshold){
         double infoGain = 0.0;
         Instances[] splitData = splitAttributeNumVal(data, attr, treshold);
@@ -125,7 +128,8 @@ public class MyC45Utils {
         return infoGain;
     }
 
-    public static double SplitInAttribute(Instances data, Attribute attr, double treshold){
+    //Split In Attribute value for Numeric
+    public static double SplitInAttributeNumeric(Instances data, Attribute attr, double treshold){
         double splitValue = 0.0;
         Instances[] splitData = splitAttributeNumVal(data, attr, treshold);
         for (int i = 0; i < splitData.length; i++){
@@ -138,6 +142,6 @@ public class MyC45Utils {
     public static double calcNumericGainRatio (Instances data, Attribute attr, double threshold) throws Exception {
         double infogain = numericInformationGain(data, attr,threshold);
         if (Utils.eq(0.0, infogain)) return 0.0;
-        return numericInformationGain(data, attr, threshold) / SplitInAttribute(data, attr, threshold);
+        return numericInformationGain(data, attr, threshold) / SplitInAttributeNumeric(data, attr, threshold);
     }
 }
