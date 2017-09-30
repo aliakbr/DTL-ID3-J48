@@ -6,6 +6,7 @@ import weka.core.*;
 public class MyC45 implements Classifier {
     private MyC45ClassifierTree root;
 
+    @Override
     public void buildClassifier(Instances instances) throws Exception {
         getCapabilities().testWithFail(instances);
 
@@ -14,10 +15,17 @@ public class MyC45 implements Classifier {
         root.buildClassifier(instances);
     }
 
+    @Override
     public double classifyInstance(Instance instance) throws Exception {
         return root.classifyInstance(instance);
     }
 
+    @Override
+    public double[] distributionForInstance(Instance instance) throws Exception {
+        return new double[0];
+    }
+
+    @Override
     public Capabilities getCapabilities() {
         Capabilities result = new Capabilities((CapabilitiesHandler) this);
         result.disableAll();
