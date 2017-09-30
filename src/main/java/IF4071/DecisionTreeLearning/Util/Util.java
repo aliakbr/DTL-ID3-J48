@@ -71,9 +71,8 @@ public class Util {
         return newData;
     }
 
-    public Classifier TenFoldsCrossValidation(Instances data, int idxClass) throws Exception{
+    public Classifier TenFoldsCrossValidation(Instances data) throws Exception{
         Classifier dtl = new MyC45();
-        //((MyC45) dtl).setKelas(idxClass);
         dtl.buildClassifier(data);
 
         Evaluation eval = new Evaluation(data);
@@ -87,14 +86,13 @@ public class Util {
         return dtl;
     }
 
-    public Classifier SplitTest(Instances data, int percent, int idxClass) throws Exception {
-        int trainSize = (int) Math.round(data.numInstances() * percent / 100);
+    public Classifier SplitTest(Instances data, int percent) throws Exception {
+        int trainSize = Math.round(data.numInstances() * percent / 100);
         int testSize = data.numInstances() - trainSize;
         Instances train = new Instances(data, 0, trainSize);
         Instances test = new Instances(data, trainSize, testSize);
 
         Classifier dtl = new MyC45();
-        //((MyC45) dtl).setKelas(idxClass);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
         eval.evaluateModel(dtl, test);
@@ -107,9 +105,8 @@ public class Util {
         return dtl;
     }
 
-    public Classifier TrainingTest(Instances train, Instances test, int idxClass) throws Exception {
+    public Classifier TrainingTest(Instances train, Instances test) throws Exception {
         Classifier dtl = new MyC45();
-        //((MyC45) dtl).setKelas(idxClass);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
         eval.evaluateModel(dtl, test);
@@ -122,9 +119,8 @@ public class Util {
         return dtl;
     }
 
-    public Classifier FullTrainingSchema(Instances data, int idxClass) throws Exception{
+    public Classifier FullTrainingSchema(Instances data) throws Exception{
         Classifier dtl = new MyC45();
-        //((MyC45) dtl).setKelas(idxClass);
         dtl.buildClassifier(data);
 
         Evaluation eval = new Evaluation(data);
