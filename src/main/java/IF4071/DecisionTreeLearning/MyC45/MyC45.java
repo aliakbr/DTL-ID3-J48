@@ -8,7 +8,7 @@ public class MyC45 implements Classifier {
 
     public MyC45(Instances instances) {
         root = new MyC45ClassifierTree();
-        root.setData(instances);D
+        root.setData(instances);
     }
 
     @Override
