@@ -96,6 +96,21 @@ public class Util {
         return dtl;
     }
 
+    public Classifier TrainingTest(Instances train, Instances test, int idxClass) throws Exception {
+        Classifier dtl = new MyC45();
+        //((MyC45) dtl).setKelas(idxClass);
+        dtl.buildClassifier(train);
+        Evaluation eval = new Evaluation(test);
+        eval.evaluateModel(dtl, test);
+
+        System.out.println();
+        System.out.println("=== Summary ===");
+        System.out.println(eval.toSummaryString());
+        System.out.println(eval.toMatrixString());
+
+        return dtl;
+    }
+
     public Classifier FullTrainingSchema(Instances data, int idxClass) throws Exception{
         Classifier dtl = new MyC45();
         //((MyC45) dtl).setKelas(idxClass);
