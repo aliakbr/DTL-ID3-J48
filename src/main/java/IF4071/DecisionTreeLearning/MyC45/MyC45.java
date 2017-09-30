@@ -1,9 +1,10 @@
 package IF4071.DecisionTreeLearning.MyC45;
 
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.*;
 
-public class MyC45 implements Classifier {
+public class MyC45 extends AbstractClassifier {
     public MyC45ClassifierTree root;
 
     public MyC45(){
@@ -35,7 +36,7 @@ public class MyC45 implements Classifier {
 
     @Override
     public Capabilities getCapabilities() {
-        Capabilities result = new Capabilities((CapabilitiesHandler) this);
+        Capabilities result = super.getCapabilities();
         result.disableAll();
 
         result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
