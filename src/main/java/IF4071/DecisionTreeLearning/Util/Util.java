@@ -14,6 +14,7 @@ import java.util.Random;
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
 import weka.filters.supervised.instance.Resample;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.instance.Randomize;
 
 public class Util {
     private Scanner input;
@@ -38,6 +39,16 @@ public class Util {
 
     public Instances Resample(Instances data) throws Exception {
         Resample filter = new Resample();
+        Instances newData;
+
+        filter.setInputFormat(data);
+        newData = Filter.useFilter(data, filter);
+
+        return newData;
+    }
+
+    public Instances Randomize(Instances data) throws Exception {
+        Randomize filter = new Randomize();
         Instances newData;
 
         filter.setInputFormat(data);
