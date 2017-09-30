@@ -139,7 +139,7 @@ public class Calculator {
         return splitValue;
     }
 
-    public static double calcNumericGainRatio (Instances data, Attribute attr, double threshold) throws Exception {
+    public static double calcNumericGainRatio (Instances data, Attribute attr, double threshold){
         double infogain = numericInformationGain(data, attr,threshold);
         if (Utils.eq(0.0, infogain)) return 0.0;
         return numericInformationGain(data, attr, threshold) / SplitInAttributeNumeric(data, attr, threshold);
