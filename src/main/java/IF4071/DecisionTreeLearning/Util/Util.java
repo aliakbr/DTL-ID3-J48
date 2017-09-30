@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Scanner;
 import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import java.util.Random;
@@ -14,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
+import weka.filters.supervised.instance.Resample;
 
 public class Util {
     private Scanner input;
@@ -28,8 +28,8 @@ public class Util {
         return data;
     }
 
-    public Instances Discretize(Instances data) throws Exception {
-        Discretize filter = new Discretize();
+    public Instances Resample(Instances data) throws Exception {
+        Resample filter = new Resample();
         Instances newData;
 
         filter.setInputFormat(data);
