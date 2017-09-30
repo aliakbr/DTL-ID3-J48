@@ -6,6 +6,9 @@ import weka.core.*;
 public class MyC45 implements Classifier {
     public MyC45ClassifierTree root;
 
+    public MyC45(){
+        root = new MyC45ClassifierTree();
+    }
     public MyC45(Instances instances) {
         root = new MyC45ClassifierTree();
         root.setData(instances);
