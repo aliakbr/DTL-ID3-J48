@@ -4,7 +4,12 @@ import weka.classifiers.Classifier;
 import weka.core.*;
 
 public class MyC45 implements Classifier {
-    private MyC45ClassifierTree root;
+    public MyC45ClassifierTree root;
+
+    public MyC45(Instances instances) {
+        root = new MyC45ClassifierTree();
+        root.setData(instances);D
+    }
 
     @Override
     public void buildClassifier(Instances instances) throws Exception {
