@@ -14,6 +14,7 @@ import java.util.Random;
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
 import weka.filters.supervised.instance.Resample;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.instance.Randomize;
 
 public class Util {
     private Scanner input;
@@ -38,6 +39,16 @@ public class Util {
 
     public Instances Resample(Instances data) throws Exception {
         Resample filter = new Resample();
+        Instances newData;
+
+        filter.setInputFormat(data);
+        newData = Filter.useFilter(data, filter);
+
+        return newData;
+    }
+
+    public Instances Randomize(Instances data) throws Exception {
+        Randomize filter = new Randomize();
         Instances newData;
 
         filter.setInputFormat(data);
@@ -82,6 +93,21 @@ public class Util {
         Instances train = new Instances(data, 0, trainSize);
         Instances test = new Instances(data, trainSize, testSize);
 
+        Classifier dtl = new MyC45();
+        //((MyC45) dtl).setKelas(idxClass);
+        dtl.buildClassifier(train);
+        Evaluation eval = new Evaluation(test);
+        eval.evaluateModel(dtl, test);
+
+        System.out.println();
+        System.out.println("=== Summary ===");
+        System.out.println(eval.toSummaryString());
+        System.out.println(eval.toMatrixString());
+
+        return dtl;
+    }
+
+    public Classifier TrainingTest(Instances train, Instances test, int idxClass) throws Exception {
         Classifier dtl = new MyC45();
         //((MyC45) dtl).setKelas(idxClass);
         dtl.buildClassifier(train);
