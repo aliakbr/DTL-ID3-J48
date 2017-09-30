@@ -1,0 +1,116 @@
+package IF4071.DecisionTreeLearning.Util;
+
+import weka.core.Instances;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Scanner;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import java.util.Random;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import IF4071.DecisionTreeLearning.MyC45.MyC45;
+
+public class Util {
+    private Scanner input;
+
+    public Instances ReadArff(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(
+                new FileReader(filename));
+        Instances data = new Instances(reader);
+        data.setClassIndex(data.numAttributes() - 1);
+        reader.close();
+
+        return data;
+    }
+
+    public Instances Discretize(Instances data) throws Exception {
+        Discretize filter = new Discretize();
+        Instances newData;
+
+        filter.setInputFormat(data);
+        newData = Filter.useFilter(data, filter);
+
+        return newData;
+    }
+
+    public Classifier TenFoldsCrossValidation(Instances data, int idxClass) throws Exception{
+        Classifier dtl = new MyC45();
+        //((MyC45) dtl).setKelas(idxClass);
+        dtl.buildClassifier(data);
+
+        Evaluation eval = new Evaluation(data);
+        eval.crossValidateModel(dtl, data, 10, new Random(1));
+
+        System.out.println();
+        System.out.println("=== Summary ===");
+        System.out.println(eval.toSummaryString());
+        System.out.println(eval.toMatrixString());
+
+        return dtl;
+    }
+
+    public Classifier SplitTest(Instances data, int percent, int idxClass) throws Exception {
+        int trainSize = (int) Math.round(data.numInstances() * percent / 100);
+        int testSize = data.numInstances() - trainSize;
+        Instances train = new Instances(data, 0, trainSize);
+        Instances test = new Instances(data, trainSize, testSize);
+
+        Classifier dtl = new MyC45();
+        //((MyC45) dtl).setKelas(idxClass);
+        dtl.buildClassifier(train);
+        Evaluation eval = new Evaluation(test);
+        eval.evaluateModel(dtl, test);
+
+        System.out.println();
+        System.out.println("=== Summary ===");
+        System.out.println(eval.toSummaryString());
+        System.out.println(eval.toMatrixString());
+
+        return dtl;
+    }
+
+    public Classifier FullTrainingSchema(Instances data, int idxClass) throws Exception{
+        Classifier dtl = new MyC45();
+        //((MyC45) dtl).setKelas(idxClass);
+        dtl.buildClassifier(data);
+
+        Evaluation eval = new Evaluation(data);
+        eval.evaluateModel(dtl, data);
+
+        System.out.println();
+        System.out.println("=== Summary ===");
+        System.out.println(eval.toSummaryString());
+        System.out.println(eval.toMatrixString());
+
+        return dtl;
+    }
+
+    public void saveModel(String filename, Classifier cls) throws Exception {
+        ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(filename));
+        output.writeObject(cls);
+        output.flush();
+        output.close();
+    }
+
+    public Classifier loadModel(String filename) throws Exception{
+        ObjectInputStream fileinput = new ObjectInputStream(new FileInputStream(filename));
+        Classifier cls = (Classifier) fileinput.readObject();
+        fileinput.close();
+        return cls;
+    }
+
+    public void classifyData(Classifier model, Instances data) throws Exception {
+        Evaluation eval = new Evaluation(data);
+        eval.evaluateModel(model, data);
+
+        System.out.println();
+        System.out.println("=== Summary ===");
+        System.out.println(eval.toSummaryString());
+        System.out.println(eval.toMatrixString());
+    }
+}
