@@ -1,5 +1,6 @@
 package IF4071.DecisionTreeLearning.Util;
 
+import IF4071.DecisionTreeLearning.MyID3.MyID3;
 import weka.core.Instances;
 
 import java.io.*;
@@ -92,7 +93,8 @@ public class Util {
         Instances train = new Instances(data, 0, trainSize);
         Instances test = new Instances(data, trainSize, testSize);
 
-        Classifier dtl = new MyC45();
+        Classifier dtl = new MyID3();
+        train.setClassIndex(train.numAttributes() - 1);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
         eval.evaluateModel(dtl, test);
