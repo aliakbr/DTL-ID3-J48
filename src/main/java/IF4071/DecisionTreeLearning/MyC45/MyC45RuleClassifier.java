@@ -54,6 +54,10 @@ public class MyC45RuleClassifier implements Serializable {
 
         // Generate rule
         generateRuleFromPath(new MyC45Rule(), root);
+
+        // Hapus semua rule dengan class initial -1.0
+        removeInitialValue();
+
         System.out.println(rule_list.toString());
         for (MyC45Rule rule: rule_list){
             System.out.println(rule.toString());
@@ -99,14 +103,37 @@ public class MyC45RuleClassifier implements Serializable {
     private void addRule_list(MyC45Rule rule){
         boolean same = false;
 
+        Vector<MyC45Rule> ruleToRemove = new Vector<MyC45Rule>();
         for (MyC45Rule curr : rule_list){
-            if (curr.ruleValue.equals(rule.ruleValue) && curr.classValue == rule.classValue){
+            if (curr.ruleValue.equals(rule.ruleValue)){
                 same = true;
+                if (curr.classValue != rule.classValue && curr.getClassValue() == -1.0){
+                    ruleToRemove.add(curr);
+                    same = false;
+                }
             }
+        }
+
+        for (MyC45Rule curr : ruleToRemove){
+            rule_list.remove(curr);
         }
 
         if (!same){
             rule_list.add(rule);
+        }
+    }
+
+    private void removeInitialValue() {
+        Vector<MyC45Rule> ruleToRemove = new Vector<MyC45Rule>();
+
+        for (MyC45Rule curr : rule_list){
+            if (curr.getClassValue() == -1.0){
+                ruleToRemove.add(curr);
+            }
+        }
+
+        for (MyC45Rule curr : ruleToRemove){
+            rule_list.remove(curr);
         }
     }
 }
