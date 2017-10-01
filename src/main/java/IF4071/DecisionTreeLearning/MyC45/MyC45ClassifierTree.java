@@ -73,7 +73,7 @@ public class MyC45ClassifierTree implements Serializable {
     }
 
     public double classifyInstance(Instance instance) throws Exception {
-        if (Utils.eq(classIndex, -1)){
+        if (splitAttribute != null){
             double splitAttrIdx;
             if (splitAttribute.isNumeric()){
                 if (instance.value(splitAttribute) >= treshold ){
@@ -194,11 +194,11 @@ public class MyC45ClassifierTree implements Serializable {
                         splittedInstances = Calculator.splitDataByAttr(data, getSplitAttribute());
                     }
 
-                    System.out.println("DEBUG attribute: " + splitAttribute.toString());
-                    System.out.println("DEBUG max instance: " + splittedInstances.length);
-                    if (splitAttribute.isNumeric()){
-                        System.out.println("DEBUG treshold : " + getTreshold());
-                    }
+//                    System.out.println("DEBUG attribute: " + splitAttribute.toString());
+//                    System.out.println("DEBUG max instance: " + splittedInstances.length);
+//                    if (splitAttribute.isNumeric()){
+//                        System.out.println("DEBUG treshold : " + getTreshold());
+//                    }
                     // Proses anak
                     for (int i = 0; i < numChild; i++) {
                         children[i] = new MyC45ClassifierTree();

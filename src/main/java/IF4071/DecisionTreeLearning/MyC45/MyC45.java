@@ -54,16 +54,6 @@ public class MyC45 extends AbstractClassifier {
     }
 
     @Override
-    public double[] distributionForInstance(Instance instance) throws Exception {
-        if (!rule) {
-            return root.distributionForInstance(instance);
-        }
-        else{
-            return ruleClassifier.distributionForInstance(instance);
-        }
-    }
-
-    @Override
     public Capabilities getCapabilities() {
         Capabilities result = super.getCapabilities();
         result.disableAll();

@@ -14,7 +14,7 @@ public class MyC45RuleClassifier implements Serializable {
     ArrayList<MyC45Rule> rule_list = new ArrayList<MyC45Rule>();
 
     public void generateRuleFromPath(MyC45Rule curr_rule, MyC45ClassifierTree curr_path){
-        if (Utils.eq(root.getClassIndex(), -1)){
+        if (root.getSplitAttribute() != null){
             for (int i = 0; i < curr_path.getChildren().length; i++){
                 if (curr_rule == null){
                     curr_rule = new MyC45Rule();
@@ -83,9 +83,5 @@ public class MyC45RuleClassifier implements Serializable {
 
     public void setRule_list(ArrayList<MyC45Rule> rule_list) {
         this.rule_list = rule_list;
-    }
-
-    public double[] distributionForInstance(Instance instance) throws Exception {
-        return root.distributionForInstance(instance);
     }
 }
