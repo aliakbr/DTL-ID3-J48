@@ -40,29 +40,9 @@ public class MyID3ClassifierTree {
         }
 
         if (splitAttribute == null) {
-            System.out.println(classDistribution);
             return classDistribution;
         } else {
-           /* System.out.println("DEBUG instance: " + instance.toString());
-            System.out.println("DEBUG attribute: " + splitAttribute.toString());
-            System.out.println("DEBUG instance value: " + instance.value(splitAttribute));
-            System.out.println("DEBUG attribute max: " + splitAttribute.numValues());
-            System.out.println("DEBUG array max: " + children.length);
-            System.out.println();*/
-           Enumeration enumeration = instance.enumerateAttributes();
-           System.out.println("DEBUG instance: " + instance.toString());
-           System.out.println("DEBUG attribute: " + splitAttribute.toString());
-           System.out.println("DEBUG index: " + splitAttribute.index());
-           while (enumeration.hasMoreElements()){
-               Attribute attribute = (Attribute) enumeration.nextElement();
-               System.out.println("DEBUG attribute name: " + attribute.toString());
-               System.out.println("DEBUG attribute value: " + instance.value(attribute));
-               System.out.println("DEBUG attribute index: " + attribute.index());
-           }
-           System.out.println();
-
             return children[(int) instance.value(splitAttribute)].distributionForInstance(instance);
-
         }
     }
 
@@ -135,9 +115,6 @@ public class MyID3ClassifierTree {
 
                     children = new MyID3ClassifierTree[numChild];
                     Instances[] splittedInstances = Calculator.splitDataByAttr(data, splitAttribute);
-
-                    //System.out.println("DEBUG attribute: " + splitAttribute.toString());
-                    //System.out.println("DEBUG max instance: " + splittedInstances.length);
 
                     // Proses anak
                     for (int i = 0; i < numChild; i++){
