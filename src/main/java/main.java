@@ -29,12 +29,10 @@ public class main {
 
         Classifier id3 = new MyC45(true);
         id3 = util.SplitTest(id3, data, 80);
-        id3.toString();
         util.saveModel("./models/myc45.v1.model", id3);
 
         Classifier loadid3;
         System.out.println("===== Load Model =====");
         loadid3 = util.loadModel("./models/myc45.v1.model");
-        loadid3.toString();
     }
 }

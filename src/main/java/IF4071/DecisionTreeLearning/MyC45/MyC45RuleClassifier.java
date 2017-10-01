@@ -72,7 +72,6 @@ public class MyC45RuleClassifier implements Serializable {
         // Pruning
         rule_list = prune(rule_list);
 
-        System.out.println(rule_list.toString());
         for (MyC45Rule rule: rule_list){
             System.out.println(rule.toString());
         }
@@ -140,24 +139,24 @@ public class MyC45RuleClassifier implements Serializable {
                 Attribute key = entry.getKey();
                 Object value = entry.getValue();
                 ArrayList<MyC45Rule> ruleNew = (ArrayList<MyC45Rule>) rule.clone();
-                for (int j = 0; j < ruleNew.size(); j++) {
-                    boolean found = false;
-                    for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
-                        Map.Entry<Attribute, Object> entry1 = it2.next();
-                        Attribute key1 = entry.getKey();
-                        Object value1 = entry.getValue();
-                        if ((key == key1) && (value == value1)){
-                            found = true;
-                            it2.remove();
-                            break;
-                        }
-                    }
-                    if (found){
+                System.out.println(rule);
+                boolean found = false;
+                for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
+                    Map.Entry<Attribute, Object> entry1 = it2.next();
+                    Attribute key1 = entry1.getKey();
+                    Object value1 = entry1.getValue();
+                    if ((key == key1) && (value == value1)){
+                        found = true;
+                        it2.remove();
                         break;
                     }
                 }
                 akurasiList.add(calcError(validationData, ruleNew));
                 ruleList.add(ruleNew);
+                System.out.println(ruleNew);
+                if (found){
+                    break;
+                }
             }
         }
 
@@ -169,6 +168,7 @@ public class MyC45RuleClassifier implements Serializable {
                 max = akurasiList.get(i);
             }
         }
+        System.out.println(ruleList.get(largestIdx));
         return ruleList.get(largestIdx);
     }
 
