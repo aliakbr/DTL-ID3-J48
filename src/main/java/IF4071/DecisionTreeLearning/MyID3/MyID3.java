@@ -35,6 +35,7 @@ public class MyID3 extends AbstractClassifier {
         result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
 
         result.enable(Capabilities.Capability.NOMINAL_CLASS);
+        result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
 
         result.setMinimumNumberInstances(0);
 
