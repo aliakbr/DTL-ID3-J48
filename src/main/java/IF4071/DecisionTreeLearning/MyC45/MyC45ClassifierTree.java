@@ -27,6 +27,12 @@ public class MyC45ClassifierTree implements Serializable {
         setSplitAttribute(null);
     }
 
+    public MyC45ClassifierTree(MyC45ClassifierTree new_root){
+        setChildren(new_root.getChildren());
+        setClassDistribution(new_root.getClassDistribution());
+        setSplitAttribute(new_root.getSplitAttribute());
+    }
+
     public void buildClassifier(Instances instances) throws Exception {
         // Build Tree
         buildTree(instances, new Vector<Attribute>());
@@ -36,7 +42,7 @@ public class MyC45ClassifierTree implements Serializable {
         prune();
     }
 
-    public double[] distributionForInstance(Instance instance) throws NoSupportForMissingValuesException {
+    public double[] distributionForInstance(Instance instance){
         if (splitAttribute == null) {
             return classDistribution;
         } else {
@@ -75,7 +81,7 @@ public class MyC45ClassifierTree implements Serializable {
         }
     }
 
-    private void buildTree(Instances data, Vector<Attribute> attributes) {
+    public void buildTree(Instances data, Vector<Attribute> attributes) {
         // Set dataset
         Instances copy = new Instances(data);
         setData(copy);

@@ -10,6 +10,8 @@ import java.util.List;
 
 public class MyC45 extends AbstractClassifier {
     public MyC45ClassifierTree root;
+    public MyC45RuleClassifier ruleClassifier = new MyC45RuleClassifier();
+    boolean rule = false;
 
     public MyC45(){
         root = new MyC45ClassifierTree();
@@ -17,6 +19,10 @@ public class MyC45 extends AbstractClassifier {
     public MyC45(Instances instances) {
         root = new MyC45ClassifierTree();
         root.setData(instances);
+    }
+
+    public MyC45(boolean rule){
+        this.rule = rule;
     }
 
     @Override
@@ -29,17 +35,32 @@ public class MyC45 extends AbstractClassifier {
         // Handling missing value for numeric and nominal value
         data = replaceMissingValues(data);
 
-        root.buildClassifier(data);
+        if (!rule) {
+            root.buildClassifier(data);
+        }
+        else{
+            ruleClassifier.buildClassifier(data);
+        }
     }
 
     @Override
     public double classifyInstance(Instance instance) throws Exception {
-        return root.classifyInstance(instance);
+        if (!rule) {
+            return root.classifyInstance(instance);
+        }
+        else{
+            return ruleClassifier.classifyInstance(instance);
+        }
     }
 
     @Override
     public double[] distributionForInstance(Instance instance) throws Exception {
-        return root.distributionForInstance(instance);
+        if (!rule) {
+            return root.distributionForInstance(instance);
+        }
+        else{
+            return ruleClassifier.distributionForInstance(instance);
+        }
     }
 
     @Override
