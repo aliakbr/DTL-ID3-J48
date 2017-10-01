@@ -4,9 +4,11 @@ import org.w3c.dom.Attr;
 import weka.classifiers.Classifier;
 import weka.core.*;
 import IF4071.DecisionTreeLearning.Util.Calculator;
+
+import java.io.Serializable;
 import java.util.*;
 
-public class MyC45ClassifierTree{
+public class MyC45ClassifierTree implements Serializable {
     private Attribute splitAttribute;
 
     private MyC45ClassifierTree children[];

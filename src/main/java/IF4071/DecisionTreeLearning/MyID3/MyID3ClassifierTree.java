@@ -3,10 +3,11 @@ package IF4071.DecisionTreeLearning.MyID3;
 import IF4071.DecisionTreeLearning.Util.Calculator;
 import weka.core.*;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
-public class MyID3ClassifierTree {
+public class MyID3ClassifierTree implements Serializable {
 
     private MyID3ClassifierTree[] children;
 
