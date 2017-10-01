@@ -1,5 +1,6 @@
 package IF4071.DecisionTreeLearning.MyC45;
 
+import org.w3c.dom.Attr;
 import weka.classifiers.Classifier;
 import weka.core.*;
 import IF4071.DecisionTreeLearning.Util.Calculator;
@@ -7,10 +8,14 @@ import java.util.*;
 
 public class MyC45ClassifierTree{
     private Attribute splitAttribute;
+
     private MyC45ClassifierTree children[];
+
     private double classDistribution[];
+
     private Instances data;
-    private Integer classIndex;
+
+    private double classIndex;
 
     // Treshold for numeric value splitting
     private double treshold;
@@ -21,72 +26,33 @@ public class MyC45ClassifierTree{
         setSplitAttribute(null);
     }
 
-    public void replaceMissingValues(Instances data) {
-        Enumeration instanceEnum = data.enumerateInstances();
-        while (instanceEnum.hasMoreElements()){
-            Instance instance = (Instance) instanceEnum.nextElement();
-            if (instance.hasMissingValue()){
-                Enumeration attrEnum = instance.enumerateAttributes();
-                while (attrEnum.hasMoreElements()){
-                    Attribute attr = (Attribute) attrEnum.nextElement();
-                    if (instance.isMissing(attr)){
-                         double mostCommonValue = getCommonValue(data, attr);
-                        instance.setValue(attr, mostCommonValue);
-                    }
-                }
-            }
-        }
-    }
-
-    private double getCommonValue(Instances data, Attribute attr) {
-        if (attr.isNumeric()){
-            // Get Median
-           List<Double> values = new ArrayList<Double>();
-            Enumeration instanceEnum = data.enumerateInstances();
-            while (instanceEnum.hasMoreElements()) {
-                Instance instance = (Instance) instanceEnum.nextElement();
-                values.add(instance.value(attr));
-            }
-
-            Collections.sort(values);
-            int size = values.size();
-            double median;
-            if (size % 2 == 0){
-                median = 0.5 * (values.get(size / 2) + values.get((size / 2) + 1));
-            }
-            else{
-                median = values.get(size / 2);
-            }
-            return median;
-        }
-        else{
-            double distribution[] = new double[attr.numValues()];
-            Enumeration instanceEnum = data.enumerateInstances();
-            while (instanceEnum.hasMoreElements()) {
-                Instance instance = (Instance) instanceEnum.nextElement();
-                distribution[(int) instance.value(attr)]++;
-            }
-
-            return Utils.maxIndex(distribution);
-        }
-    }
-
     public void buildClassifier(Instances instances) throws Exception {
         // Set dataset
         setData(instances);
 
-        // Handling missing value for numeric and nominal value
-        replaceMissingValues(data);
-
         // Build Tree
-        buildTree(data);
+        buildTree(data, new Vector<Attribute>());
 
         // Prune Tree
-        prune(data);
+        prune();
+    }
+
+    public double[] distributionForInstance(Instance instance) throws NoSupportForMissingValuesException {
+        if (splitAttribute == null) {
+            return classDistribution;
+        } else {
+            System.out.println("DEBUG instance: " + instance.toString());
+            System.out.println("DEBUG attribute: " + splitAttribute.toString());
+            System.out.println("DEBUG instance value: " + instance.value(splitAttribute));
+            System.out.println("DEBUG attribute max: " + splitAttribute.numValues());
+            System.out.println("DEBUG array max: " + children.length);
+            System.out.println();
+            return children[(int) instance.value(splitAttribute)].distributionForInstance(instance);
+        }
     }
 
     public double classifyInstance(Instance instance) throws Exception {
-        if (getClassIndex() == null && Utils.eq(getClassIndex(), -1)){
+        if (Utils.eq(classIndex, -1)){
             double splitAttrIdx;
             if (splitAttribute.isNumeric()){
                 if (instance.value(splitAttribute) >= treshold ){
@@ -106,93 +72,130 @@ public class MyC45ClassifierTree{
         }
     }
 
-    private void buildTree(Instances data) {
-        // Set dataset
-        setData(data);
-
-        int numAttr = data.numAttributes();
-        double[] gainRatios = new double[numAttr];
-        Enumeration enumeration = data.enumerateAttributes();
-
-        if (data.numInstances() == 0){
-            setClassIndex(-1);
-        }
-        else {
-            // Hitung gain ratio tiap atribut
-            while (enumeration.hasMoreElements()) {
-                Attribute attribute = (Attribute) enumeration.nextElement();
-                if (attribute.isNominal()) {
-                    gainRatios[attribute.index()] = Calculator.calcGainRatio(data, attribute);
-                } else if (attribute.isNumeric()) {
-                    setTreshold(searchTreshold(data, attribute)); // Cari treshold
-                    gainRatios[attribute.index()] = Calculator.calcNumericGainRatio(data, attribute, treshold);
-                }
-            }
-
-            // Temukan Gain Ratio Tertinggi
-            int largestGainIdx= Utils.maxIndex(gainRatios);
-            double gainRatio;
-            if (data.attribute(largestGainIdx).isNominal()) {
-                gainRatio = Calculator.calcGainRatio(data, data.attribute(largestGainIdx));
+    private void buildTree(Instances data, Vector<Attribute> attributes) {
+        if (data.numInstances() == 0) {
+            setClassIndex(-1.0);
+        } else {
+            double majorityClassValue = checkMajorityClass(data);
+            // All examples are one class
+            if (majorityClassValue != -1.0) {
+                setClassIndex(majorityClassValue);
             } else {
-                gainRatio = Calculator.calcNumericGainRatio(data, data.attribute(largestGainIdx), treshold);
-            }
-
-            // Generate Pohon
-            if (Utils.eq(0, gainRatio)) {
-                setClassDistribution(new double[data.numClasses()]);
-                Enumeration instanceEnum = data.enumerateInstances();
-                while (instanceEnum.hasMoreElements()) {
-                    Instance instance = (Instance) instanceEnum.nextElement();
-                    getClassDistribution()[(int) instance.classValue()]++;
-                }
-                Utils.normalize(getClassDistribution());
-                setClassIndex(Utils.maxIndex(getClassDistribution()));
-            } else {
-                int numChild;
-                setSplitAttribute(data.attribute(largestGainIdx));
-                if (splitAttribute.isNumeric()){
-                    numChild = 2;
-                }
-                else{
-                    numChild = splitAttribute.numValues();
+                // Hapus atribut yang sudah dicek sebelumnya
+                for (Attribute attr : attributes) {
+                    data.deleteAttributeAt(attr.index());
                 }
 
-                // Masukkan instance berdasarkan split
-                setChildren(new MyC45ClassifierTree[numChild]);
-                Instances[] splittedInstances;
-                if (data.attribute(largestGainIdx).isNumeric()){
-                    splittedInstances = Calculator.splitAttributeNumVal(data, getSplitAttribute(), treshold);
-                }
-                else{
-                    splittedInstances = Calculator.splitDataByAttr(data, getSplitAttribute());
-                }
-
-                // Proses anak
-                for (int i = 0; i < numChild; i++){
-                    getChildren()[i] = new MyC45ClassifierTree();
-                    getChildren()[i].buildTree(splittedInstances[i]);
-                }
-
-                for (int i = 0; i < numChild; ++i) {
-                    MyC45ClassifierTree children = getChildren()[i];
-                    if ((children.getClassIndex() != null) && Utils.eq(children.getClassIndex(), -1)){
-                        double[] _classDistribution = new double[this.data.numClasses()];
-                        Enumeration instanceEnum = this.data.enumerateInstances();
-                        while (instanceEnum.hasMoreElements()) {
-                            Instance instance = (Instance) instanceEnum.nextElement();
-                            _classDistribution[(int) instance.classValue()]++;
-                        }
-                        Utils.normalize(_classDistribution);
-                        int _decisonIndex = Utils.maxIndex(_classDistribution);
-
-                        getChildren()[i].setClassIndex(_decisonIndex);
-                        getChildren()[i].setClassDistribution(_classDistribution);
-
+                // Hitung gain ratio
+                double[] gainRatios = new double[data.numAttributes()];
+                Enumeration enumAttr = data.enumerateAttributes();
+                while (enumAttr.hasMoreElements()) {
+                    Attribute attr = (Attribute) enumAttr.nextElement();
+                    if (attr.isNumeric()) {
+                        setTreshold(searchTreshold(data, attr));
+                        gainRatios[attr.index()] = Calculator.calcNumericGainRatio(data, attr, getTreshold());
+                    }
+                    else {
+                        gainRatios[attr.index()] = Calculator.calcGainRatio(data, attr);
                     }
                 }
+
+
+                int largestGainIdx = Utils.maxIndex(gainRatios);
+                Vector<Attribute> nextAttributes = attributes;
+                nextAttributes.add(data.attribute(largestGainIdx));
+                double gainRatio = gainRatios[largestGainIdx];
+
+
+                // Generate Pohon
+                if (Utils.eq(0, gainRatio)) {
+                    classDistribution = new double[data.numClasses()];
+
+                    Enumeration instanceEnum = data.enumerateInstances();
+                    while (instanceEnum.hasMoreElements()) {
+                        Instance instance = (Instance) instanceEnum.nextElement();
+                        classDistribution[(int) instance.classValue()]++;
+                    }
+                    Utils.normalize(classDistribution);
+                    double majorityIndex = Utils.maxIndex(classDistribution);
+                    setClassIndex(majorityIndex);
+                } else {
+                    splitAttribute = data.attribute(largestGainIdx);
+                    int numChild;
+                    if (splitAttribute.isNominal()){
+                        numChild = splitAttribute.numValues();
+                    }
+                    else{
+                        numChild = 2;
+                    }
+
+                    children = new MyC45ClassifierTree[numChild];
+                    Instances[] splittedInstances;
+                    if (splitAttribute.isNumeric()){
+                        splittedInstances = Calculator.splitAttributeNumVal(data, getSplitAttribute(), getTreshold());
+                    }
+                    else{
+                        splittedInstances = Calculator.splitDataByAttr(data, getSplitAttribute());
+                    }
+
+                    // Proses anak
+                    for (int i = 0; i < numChild; i++) {
+                        children[i] = new MyC45ClassifierTree();
+                        children[i].buildTree(splittedInstances[i], nextAttributes);
+                    }
+
+                    for (int i = 0; i < numChild; ++i) {
+                        MyC45ClassifierTree child = children[i];
+                        if (Utils.eq(child.getClassIndex(), -1.0)) {
+                            double[] _classDistribution = new double[data.numClasses()];
+                            Enumeration instanceEnum = data.enumerateInstances();
+
+                            while (instanceEnum.hasMoreElements()) {
+                                Instance instance = (Instance) instanceEnum.nextElement();
+                                _classDistribution[(int) instance.classValue()]++;
+                            }
+
+                            Utils.normalize(_classDistribution);
+                            double majorityIndex = Utils.maxIndex(_classDistribution);
+
+                            children[i].setClassIndex(majorityIndex);
+                            children[i].setClassDistribution(_classDistribution);
+
+                        }
+                    }
+
+                }
             }
         }
+    }
+
+    private double checkMajorityClass(Instances data){
+        double ret = -1.00;
+
+        Attribute attr = data.classAttribute();
+        double distribution[] = new double[attr.numValues()];
+        Enumeration instanceEnum = data.enumerateInstances();
+        while (instanceEnum.hasMoreElements()) {
+            Instance instance = (Instance) instanceEnum.nextElement();
+            distribution[(int) instance.value(attr)]++;
+        }
+
+        boolean foundOne = false;
+        for (int i = 0; i < attr.numValues(); i++){
+            if (distribution[i] != 0){
+                if (!foundOne && ret == -1.00) {
+                    foundOne = true;
+                    ret = i;
+                } else if (foundOne && ret != -1.00){
+                    foundOne = false;
+                }
+            }
+        }
+
+        if (!foundOne){
+            ret = -1.00;
+        }
+        return ret;
     }
 
     private double searchTreshold(Instances data, Attribute attribute) {
@@ -228,7 +231,7 @@ public class MyC45ClassifierTree{
         return (double) numTrue / (double) numFalse;
     }
 
-    private void prune(Instances data) throws Exception {
+    private void prune() throws Exception {
         if (children != null) {
             // Calculate current error
             double currentError = calculateError(data);
@@ -241,7 +244,7 @@ public class MyC45ClassifierTree{
                 _classDistribution[(int) instance.classValue()]++;
             }
             Utils.normalize(_classDistribution);
-            int _decisonIndex = Utils.maxIndex(_classDistribution);
+            double _decisonIndex = Utils.maxIndex(_classDistribution);
 
 
             int numFalse = 0;
@@ -264,6 +267,11 @@ public class MyC45ClassifierTree{
                 setSplitAttribute(null);
                 setClassIndex(_decisonIndex);
                 setClassDistribution(_classDistribution);
+            }
+            else{
+                for(MyC45ClassifierTree children: getChildren()){
+                    children.prune();
+                }
             }
         }
     }
@@ -309,11 +317,11 @@ public class MyC45ClassifierTree{
         this.data = data;
     }
 
-    public Integer getClassIndex() {
+    public double getClassIndex() {
         return classIndex;
     }
 
-    public void setClassIndex(Integer classIndex) {
+    public void setClassIndex(double classIndex) {
         this.classIndex = classIndex;
     }
 }

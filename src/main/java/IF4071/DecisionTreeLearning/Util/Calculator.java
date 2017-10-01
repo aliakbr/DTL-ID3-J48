@@ -86,7 +86,7 @@ public class Calculator {
                     intrinsicValue -= frac * Utils.log2(frac);
                 }
             }
-            return calcInfoGain(data, attr) / intrinsicValue;
+            return infogain / intrinsicValue;
         }
     }
 
