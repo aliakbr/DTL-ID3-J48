@@ -95,7 +95,6 @@ public class Util {
         Instances test = new Instances(data, trainSize, testSize);
 
 //        Classifier dtl = new J48();
-        Classifier dtl = new MyC45();
         train.setClassIndex(train.numAttributes() - 1);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
