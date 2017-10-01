@@ -37,8 +37,8 @@ public class MyC45RuleClassifier implements Serializable {
             }
         }
         else{
-            System.out.println("Class value "+root.getClassIndex());
-            curr_rule.setClassValue(root.getClassIndex());
+            System.out.println("Class value "+curr_path.getClassIndex());
+            curr_rule.setClassValue(curr_path.getClassIndex());
         }
     }
 
