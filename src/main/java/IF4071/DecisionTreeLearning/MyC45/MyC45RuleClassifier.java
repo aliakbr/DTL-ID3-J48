@@ -8,6 +8,8 @@ import weka.core.Utils;
 import java.io.Serializable;
 import java.util.*;
 
+import static jdk.nashorn.internal.objects.Global.println;
+
 public class MyC45RuleClassifier implements Serializable {
     MyC45ClassifierTree root;
     ArrayList<MyC45Rule> rule_list = new ArrayList<MyC45Rule>();
@@ -136,13 +138,14 @@ public class MyC45RuleClassifier implements Serializable {
         akurasiList.add(calcError(validationData, rule));
 
         for (int i = 0; i < rule.size(); i++){
+            Vector<Map.Entry<Attribute, Object>> objectToRemove = new Vector<Map.Entry<Attribute, Object>>();
+            ArrayList<MyC45Rule> ruleNew = new ArrayList<MyC45Rule>(rule);
             for(Iterator<Map.Entry<Attribute, Object>> it = rule.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Attribute, Object> entry = it.next();
                 Attribute key = entry.getKey();
                 Object value = entry.getValue();
 
                 // Hapus Rule
-                ArrayList<MyC45Rule> ruleNew = new ArrayList<MyC45Rule>(rule);
                 for (int j = 0; j < ruleNew.size(); j++) {
                     boolean found = false;
                     for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
@@ -151,7 +154,7 @@ public class MyC45RuleClassifier implements Serializable {
                         Object value1 = entry1.getValue();
                         if ((key == key1) && (value == value1)){
                             found = true;
-                            it2.remove();
+                            objectToRemove.add(entry1);
                             break;
                         }
                     }
@@ -159,21 +162,27 @@ public class MyC45RuleClassifier implements Serializable {
                         break;
                     }
                 }
-
-                akurasiList.add(calcError(validationData, ruleNew));
-                ruleList.add(ruleNew);
             }
+
+            for (Map.Entry<Attribute, Object> curr : objectToRemove){
+                ruleNew.get(i).getRuleValue().remove(curr.getKey());
+            }
+            akurasiList.add(calcError(validationData, ruleNew));
+            ruleList.add(ruleNew);
         }
 
-        int largestIdx = 0;
-        Double max = 0.0;
+        int smallestIdx = 0;
+        Double min = akurasiList.get(0);
         for (int i = 0; i < akurasiList.size(); i++){
-            if (max < akurasiList.get(i)){
-                largestIdx = i;
-                max = akurasiList.get(i);
+            for(MyC45Rule curr : ruleList.get(i)){
+                if (curr != null) println(curr);
+            }
+            if (min > akurasiList.get(i)){
+                smallestIdx = i;
+                min = akurasiList.get(i);
             }
         }
-        return ruleList.get(largestIdx);
+        return ruleList.get(smallestIdx);
     }
 
     public MyC45ClassifierTree getRoot() {
