@@ -75,7 +75,6 @@ public class MyC45RuleClassifier implements Serializable {
         ArrayList<MyC45Rule> newRuleList = prune(rule_list);
         rule_list = newRuleList;
 
-        System.out.println(rule_list.toString());
         for (MyC45Rule rule: rule_list){
             System.out.println(rule.toString());
         }
@@ -175,7 +174,7 @@ public class MyC45RuleClassifier implements Serializable {
         Double min = akurasiList.get(0);
         for (int i = 0; i < akurasiList.size(); i++){
             for(MyC45Rule curr : ruleList.get(i)){
-                if (curr != null) println(curr);
+                //if (curr != null) println(curr);
             }
             if (min > akurasiList.get(i)){
                 smallestIdx = i;
