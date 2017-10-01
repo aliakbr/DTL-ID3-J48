@@ -28,11 +28,8 @@ public class MyC45ClassifierTree implements Serializable {
     }
 
     public void buildClassifier(Instances instances) throws Exception {
-        // Set dataset
-        setData(instances);
-
         // Build Tree
-        buildTree(data, null);
+        buildTree(instances, null);
 
         // Prune Tree
         prune();
@@ -74,6 +71,10 @@ public class MyC45ClassifierTree implements Serializable {
     }
 
     private void buildTree(Instances data, Attribute pastAttribute) {
+        // Set dataset
+        Instances copy = new Instances(data);
+        setData(copy);
+
         if (data.numInstances() == 0) {
             setClassIndex(-1.0);
         } else {
@@ -119,6 +120,7 @@ public class MyC45ClassifierTree implements Serializable {
                     Utils.normalize(classDistribution);
                     double majorityIndex = Utils.maxIndex(classDistribution);
                     setClassIndex(majorityIndex);
+
                 } else {
                     splitAttribute = data.attribute(largestGainIdx);
                     int numChild;
@@ -164,7 +166,6 @@ public class MyC45ClassifierTree implements Serializable {
 
                             children[i].setClassIndex(majorityIndex);
                             children[i].setClassDistribution(_classDistribution);
-
                         }
                     }
 
@@ -237,7 +238,8 @@ public class MyC45ClassifierTree implements Serializable {
                 numFalse += 1;
             }
         }
-        return (double) numTrue / (double) numFalse;
+
+        return (double) numFalse / (double) (numTrue + numFalse);
     }
 
     private void prune() throws Exception {
@@ -268,7 +270,7 @@ public class MyC45ClassifierTree implements Serializable {
                     numFalse += 1;
                 }
             }
-            double pruned_error = (double) numTrue/ (double) numFalse;
+            double pruned_error = (double) numFalse / (double) (numTrue + numFalse);
 
             // Prune process
             System.out.println("Curr Error : "+currentError);

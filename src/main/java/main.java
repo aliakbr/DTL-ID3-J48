@@ -27,7 +27,7 @@ public class main {
         System.out.println("======================");
         System.out.println();
 
-        Classifier id3 = new MyID3();
+        Classifier id3 = new MyC45();
         id3 = util.SplitTest(id3, data, 80);
         id3.toString();
         util.saveModel("./models/myc45.v1.model", id3);
