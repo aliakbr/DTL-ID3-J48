@@ -7,6 +7,7 @@ import weka.core.Utils;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 
 public class MyC45RuleClassifier implements Serializable {
     MyC45ClassifierTree root;
@@ -135,15 +136,15 @@ public class MyC45RuleClassifier implements Serializable {
         akurasiList.add(calcError(validationData, rule));
 
         for (int i = 0; i < rule.size(); i++){
-            for(Iterator<Map.Entry<Attribute, Object>> it = rule.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<Attribute, Object> entry = it.next();
+            for(Iterator<ConcurrentMap.Entry<Attribute, Object>> it = rule.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
+                ConcurrentMap.Entry<Attribute, Object> entry = it.next();
                 Attribute key = entry.getKey();
                 Object value = entry.getValue();
                 ArrayList<MyC45Rule> ruleNew = (ArrayList<MyC45Rule>) rule.clone();
                 System.out.println(rule);
                 boolean found = false;
-                for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry<Attribute, Object> entry1 = it2.next();
+                for (Iterator<ConcurrentMap.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
+                    ConcurrentMap.Entry<Attribute, Object> entry1 = it2.next();
                     Attribute key1 = entry1.getKey();
                     Object value1 = entry1.getValue();
                     if ((key == key1) && (value == value1)){
@@ -155,23 +156,29 @@ public class MyC45RuleClassifier implements Serializable {
 
                 akurasiList.add(calcError(validationData, ruleNew));
                 ruleList.add(ruleNew);
-                System.out.println(ruleNew);
                 if (found){
                     break;
                 }
             }
         }
 
-        int largestIdx = 0;
-        Double max = 0.0;
-        for (int i = 0; i < akurasiList.size(); i++){
-            if (max < akurasiList.get(i)){
-                largestIdx = i;
-                max = akurasiList.get(i);
+        for (ArrayList<MyC45Rule> currList : ruleList){
+            for (MyC45Rule curr : currList){
+                //System.out.println(curr);
             }
         }
-        System.out.println(ruleList.get(largestIdx));
-        return ruleList.get(largestIdx);
+
+        int smallestIdx = 0;
+        Double min = akurasiList.get(0);
+        for (int i = 0; i < akurasiList.size(); i++){
+            if (min > akurasiList.get(i)){
+                smallestIdx = i;
+                min = akurasiList.get(i);
+            }
+        }
+        System.out.println("RULE LIST");
+        System.out.println(ruleList.get(smallestIdx));
+        return ruleList.get(smallestIdx);
     }
 
     public MyC45ClassifierTree getRoot() {
