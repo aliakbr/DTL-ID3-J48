@@ -19,7 +19,7 @@ public class MyC45Rule implements Serializable{
 
     public MyC45Rule(MyC45Rule new_rule){
         classValue = new_rule.getClassValue();
-        ruleValue = new_rule.getRuleValue();
+        ruleValue = new HashMap<Attribute, Object>(new_rule.getRuleValue());
     }
 
     public void addRule(Attribute attr, Object value){

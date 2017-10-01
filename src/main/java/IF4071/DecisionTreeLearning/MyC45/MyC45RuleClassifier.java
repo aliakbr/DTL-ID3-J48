@@ -27,11 +27,12 @@ public class MyC45RuleClassifier implements Serializable {
                     curr_rule.addRule(attr, attr.value(i));
                 }
                 if (curr_path.getChildren()[i] != null) {
-                    generateRuleFromPath(curr_rule, curr_path.getChildren()[i]);
-                    rule_list.add(curr_rule);
+                    MyC45Rule child_rule = new MyC45Rule(curr_rule);
+                    generateRuleFromPath(child_rule, curr_path.getChildren()[i]);
+                    addRule_list(curr_rule);
                 }
                 else{
-                    rule_list.add(curr_rule);
+                    addRule_list(curr_rule);
                 }
             }
         }
@@ -91,5 +92,19 @@ public class MyC45RuleClassifier implements Serializable {
 
     public void setRule_list(ArrayList<MyC45Rule> rule_list) {
         this.rule_list = rule_list;
+    }
+
+    private void addRule_list(MyC45Rule rule){
+        boolean same = false;
+
+        for (MyC45Rule curr : rule_list){
+            if (curr.ruleValue.equals(rule.ruleValue) && curr.classValue == rule.classValue){
+                same = true;
+            }
+        }
+
+        if (!same){
+            rule_list.add(rule);
+        }
     }
 }
