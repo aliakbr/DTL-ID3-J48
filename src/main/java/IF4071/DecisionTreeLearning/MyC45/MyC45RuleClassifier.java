@@ -70,7 +70,8 @@ public class MyC45RuleClassifier implements Serializable {
         removeInitialValue();
 
         // Pruning
-        rule_list = prune(rule_list);
+        ArrayList<MyC45Rule> newRuleList = prune(rule_list);
+        rule_list = newRuleList;
 
         System.out.println(rule_list.toString());
         for (MyC45Rule rule: rule_list){
@@ -139,7 +140,9 @@ public class MyC45RuleClassifier implements Serializable {
                 Map.Entry<Attribute, Object> entry = it.next();
                 Attribute key = entry.getKey();
                 Object value = entry.getValue();
-                ArrayList<MyC45Rule> ruleNew = (ArrayList<MyC45Rule>) rule.clone();
+
+                // Hapus Rule
+                ArrayList<MyC45Rule> ruleNew = new ArrayList<MyC45Rule>(rule);
                 for (int j = 0; j < ruleNew.size(); j++) {
                     boolean found = false;
                     for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
@@ -156,6 +159,7 @@ public class MyC45RuleClassifier implements Serializable {
                         break;
                     }
                 }
+
                 akurasiList.add(calcError(validationData, ruleNew));
                 ruleList.add(ruleNew);
             }
