@@ -74,8 +74,7 @@ public class Util {
         return newData;
     }
 
-    public Classifier TenFoldsCrossValidation(Instances data) throws Exception{
-        Classifier dtl = new MyC45();
+    public Classifier TenFoldsCrossValidation(Classifier dtl, Instances data) throws Exception{
         dtl.buildClassifier(data);
 
         Evaluation eval = new Evaluation(data);
@@ -89,7 +88,7 @@ public class Util {
         return dtl;
     }
 
-    public Classifier SplitTest(Instances data, int percent) throws Exception {
+    public Classifier SplitTest(Classifier dtl, Instances data, int percent) throws Exception {
         int trainSize = Math.round(data.numInstances() * percent / 100);
         int testSize = data.numInstances() - trainSize;
         Instances train = new Instances(data, 0, trainSize);
@@ -97,7 +96,6 @@ public class Util {
 
 //        Classifier dtl = new J48();
         Classifier dtl = new MyC45();
-        dtl.toString();
         train.setClassIndex(train.numAttributes() - 1);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
@@ -111,8 +109,7 @@ public class Util {
         return dtl;
     }
 
-    public Classifier TrainingTest(Instances train, Instances test) throws Exception {
-        Classifier dtl = new MyC45();
+    public Classifier TrainingTest(Classifier dtl, Instances train, Instances test) throws Exception {
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
         eval.evaluateModel(dtl, test);
@@ -125,8 +122,7 @@ public class Util {
         return dtl;
     }
 
-    public Classifier FullTrainingSchema(Instances data) throws Exception{
-        Classifier dtl = new MyC45();
+    public Classifier FullTrainingSchema(Classifier dtl, Instances data) throws Exception{
         dtl.buildClassifier(data);
 
         Evaluation eval = new Evaluation(data);
