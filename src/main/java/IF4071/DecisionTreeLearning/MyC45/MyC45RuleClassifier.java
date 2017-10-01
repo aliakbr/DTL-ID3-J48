@@ -39,6 +39,7 @@ public class MyC45RuleClassifier implements Serializable {
         else{
             System.out.println("Class value "+curr_path.getClassIndex());
             curr_rule.setClassValue(curr_path.getClassIndex());
+            System.out.println("Class value set "+ curr_rule.getClassValue());
         }
     }
 
@@ -60,7 +61,7 @@ public class MyC45RuleClassifier implements Serializable {
 
     public double classifyInstance(Instance instance){
         // MASIH SALAH
-        double result = 0.0;
+        double result = 1.0;
         for (MyC45Rule rule: rule_list){
             if (!Utils.eq(rule.classifyInstance(instance), -1.0)){
                 result = rule.classifyInstance(instance);

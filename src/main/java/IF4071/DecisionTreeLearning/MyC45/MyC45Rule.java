@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MyC45Rule implements Serializable{
-    double classValue;
+    Double classValue = new Double(-1);
     Map<Attribute, Object> ruleValue = new HashMap<Attribute, Object>();
 
     public MyC45Rule(){
@@ -44,11 +44,13 @@ public class MyC45Rule implements Serializable{
 
     public double classifyInstance(Instance instance){
         boolean found = true;
-        Enumeration attrEnum = instance.enumerateAttributes();
-        while(attrEnum.hasMoreElements()){
-            Attribute attr = (Attribute) attrEnum.nextElement();
+
+        for (Map.Entry<Attribute, Object> entry : ruleValue.entrySet()) {
+            Attribute attr = entry.getKey();
+            Object val = entry.getValue();
+
             if (attr.isNumeric()){
-                double value = (Double) ruleValue.get(attr);
+                double value = (Double) val;
                 double treshold = Math.abs(value);
                 if (value < 0){
                     if (instance.value(attr) >= treshold){
@@ -70,6 +72,7 @@ public class MyC45Rule implements Serializable{
                 }
             }
         }
+
         if (found){
             return classValue;
         }
