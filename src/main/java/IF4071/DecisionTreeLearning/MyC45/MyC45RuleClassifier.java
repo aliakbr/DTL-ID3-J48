@@ -147,8 +147,8 @@ public class MyC45RuleClassifier implements Serializable {
                     boolean found = false;
                     for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
                         Map.Entry<Attribute, Object> entry1 = it2.next();
-                        Attribute key1 = entry.getKey();
-                        Object value1 = entry.getValue();
+                        Attribute key1 = entry1.getKey();
+                        Object value1 = entry1.getValue();
                         if ((key == key1) && (value == value1)){
                             found = true;
                             it2.remove();
