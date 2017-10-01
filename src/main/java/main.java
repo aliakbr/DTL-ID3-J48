@@ -1,3 +1,4 @@
+import IF4071.DecisionTreeLearning.MyID3.MyID3;
 import IF4071.DecisionTreeLearning.Util.*;
 import IF4071.DecisionTreeLearning.MyC45.*;
 import weka.classifiers.Classifier;
@@ -5,7 +6,7 @@ import weka.core.Instances;
 
 public class main {
     public static void main(String[] args) throws Exception {
-        String filename = "./data/weather.nominal.arff";
+        String filename = "./data/iris.arff";
 
         Util util = new Util();
         Instances data = util.ReadArff(filename);
@@ -26,12 +27,13 @@ public class main {
         System.out.println("======================");
         System.out.println();
 
-        Classifier id3;
-        id3 = util.SplitTest(data, 80);
+        Classifier id3 = new MyID3();
+        id3 = util.SplitTest(id3, data, 80);
         id3.toString();
         util.saveModel("./models/myc45.v1.model", id3);
 
         Classifier loadid3;
+        System.out.println("===== Load Model =====");
         loadid3 = util.loadModel("./models/myc45.v1.model");
         loadid3.toString();
     }

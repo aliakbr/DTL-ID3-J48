@@ -1,6 +1,7 @@
 package IF4071.DecisionTreeLearning.Util;
 
 import IF4071.DecisionTreeLearning.MyID3.MyID3;
+import weka.classifiers.trees.J48;
 import weka.core.Instances;
 
 import java.io.*;
@@ -13,6 +14,7 @@ import weka.classifiers.Evaluation;
 import java.util.Random;
 
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
+import weka.classifiers.trees.j48.*;
 import weka.filters.supervised.instance.Resample;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.instance.Randomize;
@@ -72,8 +74,7 @@ public class Util {
         return newData;
     }
 
-    public Classifier TenFoldsCrossValidation(Instances data) throws Exception{
-        Classifier dtl = new MyC45();
+    public Classifier TenFoldsCrossValidation(Classifier dtl, Instances data) throws Exception{
         dtl.buildClassifier(data);
 
         Evaluation eval = new Evaluation(data);
@@ -87,13 +88,13 @@ public class Util {
         return dtl;
     }
 
-    public Classifier SplitTest(Instances data, int percent) throws Exception {
+    public Classifier SplitTest(Classifier dtl, Instances data, int percent) throws Exception {
         int trainSize = Math.round(data.numInstances() * percent / 100);
         int testSize = data.numInstances() - trainSize;
         Instances train = new Instances(data, 0, trainSize);
         Instances test = new Instances(data, trainSize, testSize);
 
-        Classifier dtl = new MyID3();
+//        Classifier dtl = new J48();
         train.setClassIndex(train.numAttributes() - 1);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(data);
@@ -110,8 +111,7 @@ public class Util {
         return dtl;
     }
 
-    public Classifier TrainingTest(Instances train, Instances test) throws Exception {
-        Classifier dtl = new MyC45();
+    public Classifier TrainingTest(Classifier dtl, Instances train, Instances test) throws Exception {
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
         eval.evaluateModel(dtl, test);
@@ -124,8 +124,7 @@ public class Util {
         return dtl;
     }
 
-    public Classifier FullTrainingSchema(Instances data) throws Exception{
-        Classifier dtl = new MyC45();
+    public Classifier FullTrainingSchema(Classifier dtl, Instances data) throws Exception{
         dtl.buildClassifier(data);
 
         Evaluation eval = new Evaluation(data);
