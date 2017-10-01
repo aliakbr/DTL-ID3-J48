@@ -173,7 +173,12 @@ public class MyC45RuleClassifier implements Serializable {
         }
         System.out.println("RULE LIST");
         System.out.println(ruleList.get(smallestIdx));
-        return ruleList.get(smallestIdx);
+        if (smallestIdx == 0){
+            return ruleList.get(smallestIdx);
+        }
+        else{
+            return prune(ruleList.get(smallestIdx));
+        }
     }
 
     public MyC45ClassifierTree getRoot() {
