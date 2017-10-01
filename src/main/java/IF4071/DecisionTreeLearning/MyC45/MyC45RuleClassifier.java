@@ -32,6 +32,7 @@ public class MyC45RuleClassifier implements Serializable {
             }
         }
         else{
+            System.out.println("Class value "+root.getClassIndex());
             curr_rule.setClassValue(root.getClassIndex());
         }
     }
@@ -45,7 +46,7 @@ public class MyC45RuleClassifier implements Serializable {
         root.buildTree(data, new Vector<Attribute>());
 
         // Generate rule
-        generateRuleFromPath(null, root);
+        generateRuleFromPath(new MyC45Rule(), root);
 
         System.out.println(this.toString());
     }
