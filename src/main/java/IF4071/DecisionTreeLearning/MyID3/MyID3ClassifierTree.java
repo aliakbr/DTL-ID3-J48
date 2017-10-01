@@ -40,39 +40,71 @@ public class MyID3ClassifierTree {
         }
 
         if (splitAttribute == null) {
+            System.out.println(classDistribution);
             return classDistribution;
         } else {
-            System.out.println("DEBUG instance: " + instance.toString());
+           /* System.out.println("DEBUG instance: " + instance.toString());
             System.out.println("DEBUG attribute: " + splitAttribute.toString());
             System.out.println("DEBUG instance value: " + instance.value(splitAttribute));
             System.out.println("DEBUG attribute max: " + splitAttribute.numValues());
             System.out.println("DEBUG array max: " + children.length);
-            System.out.println();
+            System.out.println();*/
+           Enumeration enumeration = instance.enumerateAttributes();
+           System.out.println("DEBUG instance: " + instance.toString());
+           System.out.println("DEBUG attribute: " + splitAttribute.toString());
+           System.out.println("DEBUG index: " + splitAttribute.index());
+           while (enumeration.hasMoreElements()){
+               Attribute attribute = (Attribute) enumeration.nextElement();
+               System.out.println("DEBUG attribute name: " + attribute.toString());
+               System.out.println("DEBUG attribute value: " + instance.value(attribute));
+               System.out.println("DEBUG attribute index: " + attribute.index());
+           }
+           System.out.println();
+
             return children[(int) instance.value(splitAttribute)].distributionForInstance(instance);
+
         }
     }
 
     public void buildTree(Instances data, Vector<Attribute> attributes){
         if (data.numInstances() == 0) {
+            classDistribution = new double[data.numClasses()];
             classValue = -1;
         } else {
             double majorityClassValue = checkMajorityClass(data);
             // All examples are one class
             if (majorityClassValue != -1.00) {
+                Enumeration instanceEnum = data.enumerateInstances();
+
+                classDistribution = new double[data.numClasses()];
+                while (instanceEnum.hasMoreElements()) {
+                    Instance instance = (Instance) instanceEnum.nextElement();
+                    classDistribution[(int) instance.classValue()]++;
+                }
+                Utils.normalize(classDistribution);
+
                 classValue = majorityClassValue;
             } else {
                 double[] infoGains = new double[data.numAttributes()];
-                // Hapus atribut yang sudah dicek sebelumnya
-                for (Attribute attr : attributes){
-                    data.deleteAttributeAt(attr.index());
-                }
+
                 Enumeration enumeration = data.enumerateAttributes();
 
                 // Hitung gain ratio tiap atribut
                 while (enumeration.hasMoreElements()) {
-
                     Attribute attribute = (Attribute) enumeration.nextElement();
-                    infoGains[attribute.index()] = Calculator.calcInfoGain(data, attribute);
+
+                    boolean sameAttr = false;
+                    // Atribut yang sudah dicek sebelumnya tidak dicek kembali
+                    for (Attribute attr : attributes){
+                        if (attribute.index() == attr.index()){
+                            sameAttr = true;
+                        }
+                    }
+                    if (attribute.index() != data.classIndex() && !sameAttr) {
+                        infoGains[attribute.index()] = Calculator.calcInfoGain(data, attribute);
+                    } else {
+                        infoGains[attribute.index()] = -1;
+                    }
                 }
 
                 int largestGainIdx = Utils.maxIndex(infoGains);
@@ -93,6 +125,10 @@ public class MyID3ClassifierTree {
                         classDistribution[(int) instance.classValue()]++;
                     }
                     Utils.normalize(classDistribution);
+
+                    classValue = Utils.maxIndex(classDistribution);
+
+
                 } else {
                     splitAttribute = data.attribute(largestGainIdx);
                     int numChild = splitAttribute.numValues();
