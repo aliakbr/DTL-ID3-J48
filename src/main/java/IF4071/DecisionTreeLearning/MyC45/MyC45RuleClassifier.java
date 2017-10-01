@@ -6,12 +6,16 @@ import weka.core.Instances;
 import weka.core.Utils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Vector;
+import java.util.*;
 
 public class MyC45RuleClassifier implements Serializable {
     MyC45ClassifierTree root;
     ArrayList<MyC45Rule> rule_list = new ArrayList<MyC45Rule>();
+    private Instances data;
+
+    private Instances trainingData;
+
+    private Instances validationData;
 
     public void generateRuleFromPath(MyC45Rule curr_rule, MyC45ClassifierTree curr_path){
         if ((root.getSplitAttribute()) != null && (curr_path.getChildren() != null)){
@@ -46,6 +50,13 @@ public class MyC45RuleClassifier implements Serializable {
 
     public void buildClassifier(Instances instances){
         Instances data = new Instances(instances);
+        Instances copy = new Instances(instances);
+        setData(data);
+
+        int trainSize = Math.round(instances.numInstances() * 80 / 100);
+        int validationSize = instances.numInstances() - trainSize;
+        trainingData = new Instances(instances, 0, trainSize);
+        validationData = new Instances(instances, trainSize, validationSize);
 
         root = new MyC45ClassifierTree();
 
@@ -57,6 +68,9 @@ public class MyC45RuleClassifier implements Serializable {
 
         // Hapus semua rule dengan class initial -1.0
         removeInitialValue();
+
+        // Pruning
+        rule_list = prune(rule_list);
 
         System.out.println(rule_list.toString());
         for (MyC45Rule rule: rule_list){
@@ -75,6 +89,17 @@ public class MyC45RuleClassifier implements Serializable {
         return result;
     }
 
+    public double classifyInstanceWithRule(Instance instance, ArrayList<MyC45Rule> rule_list){
+        // MASIH SALAH
+        double result = 0.0;
+        for (MyC45Rule rule: rule_list){
+            if (!Utils.eq(rule.classifyInstance(instance), -1.0)){
+                result = rule.classifyInstance(instance);
+            }
+        }
+        return result;
+    }
+
     public String toString(){
         StringBuilder output = new StringBuilder();
         for (MyC45Rule rule: rule_list){
@@ -82,6 +107,69 @@ public class MyC45RuleClassifier implements Serializable {
         }
         output.append("\n");
         return output.toString();
+    }
+
+    public double calcError(Instances instances, ArrayList<MyC45Rule> rule){
+        int numFalse = 0;
+        int numTrue = 0;
+        Enumeration instanceEnum = instances.enumerateInstances();
+        while (instanceEnum.hasMoreElements()){
+            Instance instance = (Instance) instanceEnum.nextElement();
+            double predicted = classifyInstanceWithRule(instance, rule);
+            double real_class = instance.classValue();
+            if (Utils.eq(predicted, real_class)){
+                numTrue += 1;
+            }
+            else{
+                numFalse += 1;
+            }
+        }
+
+        return (double) numFalse / (double) (numTrue + numFalse);
+    }
+
+    public ArrayList<MyC45Rule> prune(ArrayList<MyC45Rule> rule) {
+        List<ArrayList<MyC45Rule>> ruleList = new ArrayList<ArrayList<MyC45Rule>>();
+        ruleList.add(rule);
+        List<Double> akurasiList = new ArrayList<Double>();
+        akurasiList.add(calcError(validationData, rule));
+
+        for (int i = 0; i < rule.size(); i++){
+            for(Iterator<Map.Entry<Attribute, Object>> it = rule.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<Attribute, Object> entry = it.next();
+                Attribute key = entry.getKey();
+                Object value = entry.getValue();
+                ArrayList<MyC45Rule> ruleNew = (ArrayList<MyC45Rule>) rule.clone();
+                for (int j = 0; j < ruleNew.size(); j++) {
+                    boolean found = false;
+                    for (Iterator<Map.Entry<Attribute, Object>> it2 = ruleNew.get(i).getRuleValue().entrySet().iterator(); it.hasNext(); ) {
+                        Map.Entry<Attribute, Object> entry1 = it2.next();
+                        Attribute key1 = entry.getKey();
+                        Object value1 = entry.getValue();
+                        if ((key == key1) && (value == value1)){
+                            found = true;
+                            it2.remove();
+                            break;
+                        }
+                    }
+                    if (found){
+                        break;
+                    }
+                }
+                akurasiList.add(calcError(validationData, ruleNew));
+                ruleList.add(ruleNew);
+            }
+        }
+
+        int largestIdx = 0;
+        Double max = 0.0;
+        for (int i = 0; i < akurasiList.size(); i++){
+            if (max < akurasiList.get(i)){
+                largestIdx = i;
+                max = akurasiList.get(i);
+            }
+        }
+        return ruleList.get(largestIdx);
     }
 
     public MyC45ClassifierTree getRoot() {
@@ -135,5 +223,13 @@ public class MyC45RuleClassifier implements Serializable {
         for (MyC45Rule curr : ruleToRemove){
             rule_list.remove(curr);
         }
+    }
+
+    public Instances getData() {
+        return data;
+    }
+
+    public void setData(Instances data) {
+        this.data = data;
     }
 }
