@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
+import static jdk.nashorn.internal.objects.Global.println;
+
 public class MyC45RuleClassifier implements Serializable {
     MyC45ClassifierTree root;
     ArrayList<MyC45Rule> rule_list = new ArrayList<MyC45Rule>();
@@ -153,18 +155,11 @@ public class MyC45RuleClassifier implements Serializable {
                         break;
                     }
                 }
-
                 akurasiList.add(calcError(validationData, ruleNew));
                 ruleList.add(ruleNew);
                 if (found){
                     break;
                 }
-            }
-        }
-
-        for (ArrayList<MyC45Rule> currList : ruleList){
-            for (MyC45Rule curr : currList){
-                //System.out.println(curr);
             }
         }
 
