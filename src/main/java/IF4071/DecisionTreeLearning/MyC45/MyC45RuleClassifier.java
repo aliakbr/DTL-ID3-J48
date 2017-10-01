@@ -28,6 +28,7 @@ public class MyC45RuleClassifier implements Serializable {
                 }
                 if (curr_path.getChildren()[i] != null) {
                     generateRuleFromPath(curr_rule, curr_path.getChildren()[i]);
+                    rule_list.add(curr_rule);
                 }
                 else{
                     rule_list.add(curr_rule);
@@ -50,8 +51,10 @@ public class MyC45RuleClassifier implements Serializable {
 
         // Generate rule
         generateRuleFromPath(new MyC45Rule(), root);
-
-        System.out.println(this.toString());
+        System.out.println(rule_list.toString());
+        for (MyC45Rule rule: rule_list){
+            System.out.println(rule.toString());
+        }
     }
 
     public double classifyInstance(Instance instance){

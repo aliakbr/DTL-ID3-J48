@@ -4,11 +4,12 @@ import org.w3c.dom.Attr;
 import weka.core.Attribute;
 import weka.core.Instance;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MyC45Rule {
+public class MyC45Rule implements Serializable{
     double classValue;
     Map<Attribute, Object> ruleValue = new HashMap<Attribute, Object>();
 
