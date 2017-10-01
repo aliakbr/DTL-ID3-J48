@@ -12,7 +12,6 @@ import java.util.Vector;
 public class MyC45RuleClassifier implements Serializable {
     MyC45ClassifierTree root;
     ArrayList<MyC45Rule> rule_list = new ArrayList<MyC45Rule>();
-    private double classDistribution[];
 
     public void generateRuleFromPath(MyC45Rule curr_rule, MyC45ClassifierTree curr_path){
         if (Utils.eq(root.getClassIndex(), -1)){
@@ -51,7 +50,7 @@ public class MyC45RuleClassifier implements Serializable {
         System.out.println(this.toString());
     }
 
-    public double classifyInstance(Instance instance) throws Exception {
+    public double classifyInstance(Instance instance){
         double result = -1.0;
         for (MyC45Rule rule: rule_list){
             if (!Utils.eq(rule.classifyInstance(instance), -1.0)){
@@ -86,8 +85,7 @@ public class MyC45RuleClassifier implements Serializable {
         this.rule_list = rule_list;
     }
 
-    public double[] distributionForInstance(Instance instance) {
-        double[] result = new double[0];
-        return result;
+    public double[] distributionForInstance(Instance instance) throws Exception {
+        return root.distributionForInstance(instance);
     }
 }
