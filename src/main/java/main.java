@@ -5,7 +5,7 @@ import weka.core.Instances;
 
 public class main {
     public static void main(String[] args) throws Exception {
-        String filename = "./data/weather.nominal.arff";
+        String filename = "./data/iris.arff";
 
         Util util = new Util();
         Instances data = util.ReadArff(filename);

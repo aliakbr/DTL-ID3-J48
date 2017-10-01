@@ -1,7 +1,6 @@
 package IF4071.DecisionTreeLearning.MyC45;
 
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
 import weka.core.*;
 
 import java.util.ArrayList;

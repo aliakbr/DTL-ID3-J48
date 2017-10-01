@@ -1,7 +1,6 @@
 package IF4071.DecisionTreeLearning.MyC45;
 
-import org.w3c.dom.Attr;
-import weka.classifiers.Classifier;
+import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
 import weka.core.*;
 import IF4071.DecisionTreeLearning.Util.Calculator;
 
@@ -33,7 +32,7 @@ public class MyC45ClassifierTree implements Serializable {
         setData(instances);
 
         // Build Tree
-        buildTree(data, new Vector<Attribute>());
+        buildTree(data, null);
 
         // Prune Tree
         prune();
@@ -74,7 +73,7 @@ public class MyC45ClassifierTree implements Serializable {
         }
     }
 
-    private void buildTree(Instances data, Vector<Attribute> attributes) {
+    private void buildTree(Instances data, Attribute pastAttribute) {
         if (data.numInstances() == 0) {
             setClassIndex(-1.0);
         } else {
@@ -84,8 +83,9 @@ public class MyC45ClassifierTree implements Serializable {
                 setClassIndex(majorityClassValue);
             } else {
                 // Hapus atribut yang sudah dicek sebelumnya
-                for (Attribute attr : attributes) {
-                    data.deleteAttributeAt(attr.index());
+                if (pastAttribute != null){
+                    pastAttribute.toString();
+                    data.deleteAttributeAt(pastAttribute.index());
                 }
 
                 // Hitung gain ratio
@@ -104,10 +104,8 @@ public class MyC45ClassifierTree implements Serializable {
 
 
                 int largestGainIdx = Utils.maxIndex(gainRatios);
-                Vector<Attribute> nextAttributes = attributes;
-                nextAttributes.add(data.attribute(largestGainIdx));
+                Attribute nextAttribute = data.attribute(largestGainIdx);
                 double gainRatio = gainRatios[largestGainIdx];
-
 
                 // Generate Pohon
                 if (Utils.eq(0, gainRatio)) {
@@ -134,16 +132,20 @@ public class MyC45ClassifierTree implements Serializable {
                     children = new MyC45ClassifierTree[numChild];
                     Instances[] splittedInstances;
                     if (splitAttribute.isNumeric()){
-                        splittedInstances = Calculator.splitAttributeNumVal(data, getSplitAttribute(), getTreshold());
+                        splittedInstances = Calculator.splitDataByAttrNum(data, getSplitAttribute(), getTreshold());
                     }
                     else{
                         splittedInstances = Calculator.splitDataByAttr(data, getSplitAttribute());
                     }
 
+                    System.out.println("DEBUG attribute: " + splitAttribute.toString());
+                    System.out.println("DEBUG max instance: " + splittedInstances.length);
+                    System.out.println("Next attribute : "+ nextAttribute);
+
                     // Proses anak
                     for (int i = 0; i < numChild; i++) {
                         children[i] = new MyC45ClassifierTree();
-                        children[i].buildTree(splittedInstances[i], nextAttributes);
+                        children[i].buildTree(splittedInstances[i], nextAttribute);
                     }
 
                     for (int i = 0; i < numChild; ++i) {
@@ -201,18 +203,23 @@ public class MyC45ClassifierTree implements Serializable {
     }
 
     private double searchTreshold(Instances data, Attribute attribute) {
-        double[] treshold = new double[data.numInstances()];
+        double[] _treshold = new double[data.numInstances()];
         double[] gainRatio = new double[data.numInstances()];
-        Enumeration instanceEnum = data.enumerateInstances();
-        for (int i = 0; i < data.numInstances(); i++){
-            if (data.instance(i).classValue() != data.instance(i++).classValue()){
-                treshold[i] = (data.instance(i).value(attribute) + data.instance(i++).value(attribute))/2;
-                gainRatio[i] = Calculator.calcNumericGainRatio(data, attribute, treshold[i]);
+        for (int i = 0; i < data.numInstances()-1; i++){
+            int next_index = i + 1;
+            double currentClass = data.instance(i).classValue();
+            double nextClass = data.instance(next_index).classValue();
+            if(currentClass != nextClass) {
+                double current_attr_val = data.instance(i).value(attribute);
+                double next_attr_val = data.instance(next_index).value(attribute);
+                _treshold[i] = (current_attr_val + next_attr_val)/2;
+                gainRatio[i] = Calculator.calcNumericGainRatio(data, attribute, _treshold[i]);
+//                System.out.println(i +" "+"gain ratio : "+ gainRatio[i]);
             }
         }
-
-        double maxGainTres = treshold[Utils.maxIndex(gainRatio)];
-        return maxGainTres;
+        double res = (double) _treshold[Utils.maxIndex(gainRatio)];
+//        System.out.println("Max Tres : " + res);
+        return res;
     }
 
     private double calculateError(Instances instances) throws Exception {
@@ -264,7 +271,10 @@ public class MyC45ClassifierTree implements Serializable {
             double pruned_error = (double) numTrue/ (double) numFalse;
 
             // Prune process
+            System.out.println("Curr Error : "+currentError);
+            System.out.println("Pruned Error : "+pruned_error);
             if (pruned_error < currentError){
+                System.out.println("DEBUG Attribute pruned : "+splitAttribute.toString());
                 setChildren(null);
                 setSplitAttribute(null);
                 setClassIndex(_decisonIndex);
@@ -275,6 +285,9 @@ public class MyC45ClassifierTree implements Serializable {
                     children.prune();
                 }
             }
+        }
+        else{
+            System.out.println("No Pruning");
         }
     }
 

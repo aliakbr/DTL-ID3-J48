@@ -10,29 +10,24 @@ import java.util.Enumeration;
 public class Calculator {
     // Entropy calculator
     public static double calculateEntropy(Instances data) {
-        if (data.numInstances() == 0){
-            return 0.0;
-        }
-        else{
-            int totalClass = data.numClasses();
-            //System.out.println("DEBUG total class: " + totalClass);
-            double[] classCount = new double[totalClass];
-            Enumeration instanceEnum = data.enumerateInstances();
-            while (instanceEnum.hasMoreElements()){
-                Instance instance = (Instance) instanceEnum.nextElement();
-                //System.out.println("DEBUG class index: " + instance.classIndex());
-                //System.out.println("DEBUG class value: " + instance.classValue());
-                classCount[(int) instance.classValue()]++;
-            }
-            double entropy = 0.0;
+        if (data.numInstances() == 0) return 0.0;
 
-            for (int i = 0; i < classCount.length; i++){
-                double frac = classCount[i]/data.numInstances();
-                entropy += -1 * frac * Utils.log2(frac);
-            }
-
-            return entropy;
+        double[] classCounts = new double[data.numClasses()];
+        Enumeration instanceEnum = data.enumerateInstances();
+        while (instanceEnum.hasMoreElements()) {
+            Instance inst = (Instance) instanceEnum.nextElement();
+            classCounts[(int) inst.classValue()]++;
         }
+
+        double entropy = 0;
+        for (int i = 0; i < data.numClasses(); i++) {
+            double fraction = classCounts[i] / data.numInstances();
+            if (fraction != 0) {
+                entropy -= fraction * Utils.log2(fraction);
+            }
+        }
+
+        return entropy;
     }
 
     // Split data by attr
@@ -63,8 +58,8 @@ public class Calculator {
         infoGain = calculateEntropy(data);
         for (int i = 0; i < attr.numValues(); i++) {
             if (splitData[i].numInstances() > 0) {
-                infoGain -= (double) splitData[i].numInstances() /
-                        (double) data.numInstances() * calculateEntropy(splitData[i]);
+                double frac = (double) splitData[i].numInstances() / (double) data.numInstances();
+                infoGain -=  frac * calculateEntropy(splitData[i]);
             }
         }
         return infoGain;
@@ -93,7 +88,7 @@ public class Calculator {
     // Numeric handler
 
     //Split by attr val
-    public static Instances[] splitAttributeNumVal(Instances data, Attribute attr, double treshold){
+    public static Instances[] splitDataByAttrNum(Instances data, Attribute attr, double treshold){
         Instances[] splittedData = new Instances[2];
         for (int i = 0; i < 2; i++){
             splittedData[i] = new Instances(data, data.numInstances()); //Initialize splitted instances
@@ -114,37 +109,44 @@ public class Calculator {
             instances.compactify(); // to reduce array size to fit num of instances
         }
 
+//        System.out.println("Data Below "+ treshold + " Count : "+splittedData[0].numInstances());
+//        System.out.println("Data Below "+ treshold + " Count : "+splittedData[1].numInstances());
+
         return splittedData;
     }
 
     // Numeric Information Gain
     public static double numericInformationGain(Instances data, Attribute attr, double treshold){
         double infoGain = 0.0;
-        Instances[] splitData = splitAttributeNumVal(data, attr, treshold);
+        Instances[] splitData = splitDataByAttrNum(data, attr, treshold);
         infoGain = calculateEntropy(data);
         for (int i = 0; i < 2; i++) {
             if (splitData[i].numInstances() > 0) {
-                infoGain -= (double) splitData[i].numInstances() /
-                        (double) data.numInstances() * calculateEntropy(splitData[i]);
+                double frac = (double) splitData[i].numInstances() / (double) data.numInstances();
+                infoGain -=  frac * calculateEntropy(splitData[i]);
             }
         }
         return infoGain;
     }
 
-    //Split In Attribute value for Numeric
-    public static double SplitInAttributeNumeric(Instances data, Attribute attr, double treshold){
-        double splitValue = 0.0;
-        Instances[] splitData = splitAttributeNumVal(data, attr, treshold);
-        for (int i = 0; i < splitData.length; i++){
-            double frac = splitData[i].numInstances()/data.numInstances();
-            splitValue += -1 * frac * Utils.log2(frac);
+    public static double calcNumericGainRatio (Instances data, Attribute attr, double treshold){
+        double infogain = numericInformationGain(data, attr,treshold);
+        if (Utils.eq(0.0, infogain)){
+            return 0.0;
         }
-        return splitValue;
-    }
+        else{
+            double intrinsicValue = 0.0;
+            Instances[] splitData;
+            splitData = splitDataByAttrNum(data, attr, treshold);
+            for (int i = 0; i < 2; ++i) {
+                if (splitData[i].numInstances() > 0) {
+                    double frac = (double)splitData[i].numInstances()/(double)data.numInstances();
+                    intrinsicValue -= frac * Utils.log2(frac);
+                }
+            }
 
-    public static double calcNumericGainRatio (Instances data, Attribute attr, double threshold){
-        double infogain = numericInformationGain(data, attr,threshold);
-        if (Utils.eq(0.0, infogain)) return 0.0;
-        return numericInformationGain(data, attr, threshold) / SplitInAttributeNumeric(data, attr, threshold);
+            double value = infogain/intrinsicValue;
+            return value;
+        }
     }
 }

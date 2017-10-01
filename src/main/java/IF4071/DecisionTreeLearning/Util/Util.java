@@ -1,6 +1,7 @@
 package IF4071.DecisionTreeLearning.Util;
 
 import IF4071.DecisionTreeLearning.MyID3.MyID3;
+import weka.classifiers.trees.J48;
 import weka.core.Instances;
 
 import java.io.*;
@@ -13,6 +14,7 @@ import weka.classifiers.Evaluation;
 import java.util.Random;
 
 import IF4071.DecisionTreeLearning.MyC45.MyC45;
+import weka.classifiers.trees.j48.*;
 import weka.filters.supervised.instance.Resample;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.instance.Randomize;
@@ -93,7 +95,9 @@ public class Util {
         Instances train = new Instances(data, 0, trainSize);
         Instances test = new Instances(data, trainSize, testSize);
 
+//        Classifier dtl = new J48();
         Classifier dtl = new MyC45();
+        dtl.toString();
         train.setClassIndex(train.numAttributes() - 1);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(test);
