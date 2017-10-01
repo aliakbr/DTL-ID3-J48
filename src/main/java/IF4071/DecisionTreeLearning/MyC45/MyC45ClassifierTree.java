@@ -16,6 +16,10 @@ public class MyC45ClassifierTree implements Serializable {
 
     private Instances data;
 
+    private Instances trainingData;
+
+    private Instances validationData;
+
     private double classIndex;
 
     // Treshold for numeric value splitting
@@ -34,8 +38,16 @@ public class MyC45ClassifierTree implements Serializable {
     }
 
     public void buildClassifier(Instances instances) throws Exception {
+        Instances copy = new Instances(instances);
+        setData(copy);
+
+        int trainSize = Math.round(instances.numInstances() * 80 / 100);
+        int validationSize = instances.numInstances() - trainSize;
+        trainingData = new Instances(instances, 0, trainSize);
+        validationData = new Instances(instances, trainSize, validationSize);
+
         // Build Tree
-        buildTree(instances, new Vector<Attribute>());
+        buildTree(trainingData, new Vector<Attribute>());
 
         System.out.println("Prune");
         // Prune Tree
@@ -85,6 +97,10 @@ public class MyC45ClassifierTree implements Serializable {
         // Set dataset
         Instances copy = new Instances(data);
         setData(copy);
+        int trainSize = Math.round(copy.numInstances() * 80 / 100);
+        int validationSize = copy.numInstances() - trainSize;
+        trainingData = new Instances(copy, 0, trainSize);
+        validationData = new Instances(copy, trainSize, validationSize);
 
         if (data.numInstances() == 0) {
             classDistribution = new double[data.numClasses()];
@@ -282,11 +298,11 @@ public class MyC45ClassifierTree implements Serializable {
     private void prune() throws Exception {
         if (children != null) {
             // Calculate current error
-            double currentError = calculateError(data);
+            double currentError = calculateError(validationData);
 
             // Calculate pruned error
-            double[] _classDistribution = new double[data.numClasses()];
-            Enumeration instanceEnum = data.enumerateInstances();
+            double[] _classDistribution = new double[validationData.numClasses()];
+            Enumeration instanceEnum = validationData.enumerateInstances();
             while (instanceEnum.hasMoreElements()) {
                 Instance instance = (Instance) instanceEnum.nextElement();
                 _classDistribution[(int) instance.classValue()]++;
@@ -297,7 +313,7 @@ public class MyC45ClassifierTree implements Serializable {
 
             int numFalse = 0;
             int numTrue = 0;
-            instanceEnum = data.enumerateInstances();
+            instanceEnum = validationData.enumerateInstances();
             while(instanceEnum.hasMoreElements()){
                 Instance instance = (Instance) instanceEnum.nextElement();
                 if (_decisonIndex == instance.classIndex()){
