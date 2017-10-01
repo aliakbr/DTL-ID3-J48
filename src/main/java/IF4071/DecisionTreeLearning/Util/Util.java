@@ -98,9 +98,6 @@ public class Util {
         train.setClassIndex(train.numAttributes() - 1);
         dtl.buildClassifier(train);
         Evaluation eval = new Evaluation(data);
-        System.out.println(test);
-        System.out.println(dtl);
-        System.out.println(eval);
         eval.evaluateModel(dtl, test);
 
         System.out.println();
