@@ -29,7 +29,7 @@ public class MyC45ClassifierTree implements Serializable {
 
     public void buildClassifier(Instances instances) throws Exception {
         // Build Tree
-        buildTree(instances, null);
+        buildTree(instances, new Vector<Attribute>());
 
         // Prune Tree
         prune();
@@ -39,12 +39,6 @@ public class MyC45ClassifierTree implements Serializable {
         if (splitAttribute == null) {
             return classDistribution;
         } else {
-            System.out.println("DEBUG instance: " + instance.toString());
-            System.out.println("DEBUG attribute: " + splitAttribute.toString());
-            System.out.println("DEBUG instance value: " + instance.value(splitAttribute));
-            System.out.println("DEBUG attribute max: " + splitAttribute.numValues());
-            System.out.println("DEBUG array max: " + children.length);
-            System.out.println();
             return children[(int) instance.value(splitAttribute)].distributionForInstance(instance);
         }
     }
@@ -70,43 +64,68 @@ public class MyC45ClassifierTree implements Serializable {
         }
     }
 
-    private void buildTree(Instances data, Attribute pastAttribute) {
+    private void buildTree(Instances data, Vector<Attribute> attributes) {
         // Set dataset
         Instances copy = new Instances(data);
         setData(copy);
 
         if (data.numInstances() == 0) {
+            classDistribution = new double[data.numClasses()];
             setClassIndex(-1.0);
         } else {
             double majorityClassValue = checkMajorityClass(data);
             // All examples are one class
             if (majorityClassValue != -1.0) {
+                Enumeration instanceEnum = data.enumerateInstances();
+
+                classDistribution = new double[data.numClasses()];
+                while (instanceEnum.hasMoreElements()) {
+                    Instance instance = (Instance) instanceEnum.nextElement();
+                    classDistribution[(int) instance.classValue()]++;
+                }
+                Utils.normalize(classDistribution);
                 setClassIndex(majorityClassValue);
             } else {
-                // Hapus atribut yang sudah dicek sebelumnya
-                if (pastAttribute != null){
-                    pastAttribute.toString();
-                    data.deleteAttributeAt(pastAttribute.index());
-                }
 
                 // Hitung gain ratio
                 double[] gainRatios = new double[data.numAttributes()];
                 Enumeration enumAttr = data.enumerateAttributes();
                 while (enumAttr.hasMoreElements()) {
-                    Attribute attr = (Attribute) enumAttr.nextElement();
-                    if (attr.isNumeric()) {
-                        setTreshold(searchTreshold(data, attr));
-                        gainRatios[attr.index()] = Calculator.calcNumericGainRatio(data, attr, getTreshold());
+                    Attribute attribute = (Attribute) enumAttr.nextElement();
+
+                    boolean sameAttr = false;
+                    // Atribut yang sudah dicek sebelumnya tidak dicek kembali
+                    for (Attribute attr : attributes){
+                        if (attribute.index() == attr.index()){
+                            sameAttr = true;
+                            break;
+                        }
+                    }
+                    if (attribute.isNumeric()) {
+                        setTreshold(searchTreshold(data, attribute));
+                        if (attribute.index() != data.classIndex() && !sameAttr) {
+                            gainRatios[attribute.index()] = Calculator.calcNumericGainRatio(data, attribute, getTreshold());
+                        } else {
+                            gainRatios[attribute.index()] = -1;
+                        }
+
                     }
                     else {
-                        gainRatios[attr.index()] = Calculator.calcGainRatio(data, attr);
+                        if (attribute.index() != data.classIndex() && !sameAttr) {
+                            gainRatios[attribute.index()] = Calculator.calcGainRatio(data, attribute);
+                        } else {
+                            gainRatios[attribute.index()] = -1;
+                        }
                     }
                 }
 
 
                 int largestGainIdx = Utils.maxIndex(gainRatios);
-                Attribute nextAttribute = data.attribute(largestGainIdx);
                 double gainRatio = gainRatios[largestGainIdx];
+
+                // Atribut yang tidak dipertimbangkan selanjutnya
+                Vector<Attribute> nextAttributes = attributes;
+                nextAttributes.add(data.attribute(largestGainIdx));
 
                 // Generate Pohon
                 if (Utils.eq(0, gainRatio)) {
@@ -142,12 +161,11 @@ public class MyC45ClassifierTree implements Serializable {
 
                     System.out.println("DEBUG attribute: " + splitAttribute.toString());
                     System.out.println("DEBUG max instance: " + splittedInstances.length);
-                    System.out.println("Next attribute : "+ nextAttribute);
 
                     // Proses anak
                     for (int i = 0; i < numChild; i++) {
                         children[i] = new MyC45ClassifierTree();
-                        children[i].buildTree(splittedInstances[i], nextAttribute);
+                        children[i].buildTree(splittedInstances[i], nextAttributes);
                     }
 
                     for (int i = 0; i < numChild; ++i) {
