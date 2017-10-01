@@ -70,7 +70,8 @@ public class MyC45RuleClassifier implements Serializable {
         removeInitialValue();
 
         // Pruning
-        rule_list = prune(rule_list);
+        ArrayList<MyC45Rule> newRuleList = prune(rule_list);
+        rule_list = newRuleList;
 
         for (MyC45Rule rule: rule_list){
             System.out.println(rule.toString());
@@ -151,6 +152,7 @@ public class MyC45RuleClassifier implements Serializable {
                         break;
                     }
                 }
+
                 akurasiList.add(calcError(validationData, ruleNew));
                 ruleList.add(ruleNew);
                 System.out.println(ruleNew);
